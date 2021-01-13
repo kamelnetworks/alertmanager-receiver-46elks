@@ -26,6 +26,7 @@ import (
 	"net/url"
 	"os"
 	"strconv"
+	"strings"
 	"sync"
 
 	"gopkg.in/yaml.v2"
@@ -106,13 +107,14 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 		return
 	}
 
-	if err := ioutil.WriteFile("active-alerts.yaml", yidl, 0644); err != nil {
-		log.Printf("Error write new active alert YAML: %v", err)
-		http.Error(w, "Handling error", http.StatusInternalServerError)
+	to := "+" + r.URL.Path[1:]
+	if !strings.HasPrefix(to, "+467") {
+		log.Printf("Number has to start with +467.., to is: %q", to)
+		http.Error(w, "Invalid to number", http.StatusForbidden)
 		return
 	}
 
-	log.Printf("New alert! ID: %q, Data: %+v", id, alert)
+	log.Printf("New alert! To: %q, ID: %q, Data: %+v", to, id, alert)
 	message := fmt.Sprintf("%s\n%s\n\n", alert.Annotations.Summary, alert.Annotations.Description)
 	for k, v := range alert.Labels {
 		message += fmt.Sprintf("%s: %s\n", k, v)
@@ -121,23 +123,31 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 
 	data := url.Values{
 		"from":    {"KamelNet"},
-		"to":      {"+46702744670"},
+		"to":      {to},
 		"message": {message},
 	}
 
-	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/SMS", bytes.NewBufferString(data.Encode()))
+	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/sms", bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
 	req.SetBasicAuth(apiUsername, apiPassword)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
-
+	if err != nil {
+		log.Printf("SMS sending failure: %+v", err)
+	}
 	defer resp.Body.Close()
 	_, err = ioutil.ReadAll(resp.Body)
 
 	if err != nil {
-		log.Printf("SMS sending failure: %+v", err)
+		log.Printf("SMS sending read failure: %+v", err)
+	}
+
+	if err := ioutil.WriteFile("active-alerts.yaml", yidl, 0644); err != nil {
+		log.Printf("Error write new active alert YAML: %v", err)
+		http.Error(w, "Handling error", http.StatusInternalServerError)
+		return
 	}
 }
 

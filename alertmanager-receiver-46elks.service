@@ -1,0 +1,10 @@
+[Unit]
+Description=Alertmanager Receiver 46elks
+
+[Service]
+ExecStart=/usr/local/bin/alertmanager-receiver-46elks
+User=nobody
+WorkingDirectory=/tmp
+
+[Install]
+WantedBy=multi-user.target
