@@ -136,12 +136,16 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 	resp, err := client.Do(req)
 	if err != nil {
 		log.Printf("SMS sending failure: %+v", err)
+		http.Error(w, "SMS error", http.StatusInternalServerError)
+		return
 	}
 	defer resp.Body.Close()
 	_, err = ioutil.ReadAll(resp.Body)
 
 	if err != nil {
 		log.Printf("SMS sending read failure: %+v", err)
+		http.Error(w, "SMS error", http.StatusInternalServerError)
+		return
 	}
 
 	if err := ioutil.WriteFile("active-alerts.yaml", yidl, 0644); err != nil {
