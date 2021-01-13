@@ -1,0 +1,4 @@
+.*.sw?
+alertmanager-receiver-46elks
+active-alerts.yaml
+api.go
