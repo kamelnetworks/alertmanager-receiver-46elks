@@ -1,7 +1,7 @@
 # alertmanager-receiver-46elks
 SMS sender using the 46elks API for Prometheus Alertmanager
 
-* compile program
+* compile program using 1.19 or better: go build main.go
 * copy program to /usr/local/bin/
 * copy env file to /etc/sysconfig
 * alter env file to suide your needs
