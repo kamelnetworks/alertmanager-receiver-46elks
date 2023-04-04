@@ -34,6 +34,11 @@ import (
 
 var (
 	m = sync.Mutex{}
+	apiUSername = ""
+	apiPassword = ""
+	sender = ""
+	port = ""
+	
 )
 
 type Alert struct {
@@ -122,7 +127,7 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 	log.Printf("Message: %s", message)
 
 	data := url.Values{
-		"from":    {"KamelNet"},
+		"from":    {sender},
 		"to":      {to},
 		"message": {message},
 	}
@@ -157,6 +162,27 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 
 func main() {
 	log.Printf("Running")
+	
+	// Read environment variables for username and password
+	apiUsername := os.Getenv("API_USERNAME")
+	if apiUsername == "" {
+		log.Fatal("Environment variable API_USERNAME is not set")
+	}
+	apiPassword := os.Getenv("API_PASSWORD")
+	if apiPassword == "" {
+		log.Fatal("Environment variable API_PASSWORD is not set")
+	}
+	sender := os.Getenv("ALERTMANAGER_SENDER")
+	if semder == "" {
+		log.Fatal("Environment variable API_SENDER is not set")
+	}
+	
+	// Read the environment variable for port, and use the default port 1025 if not set
+	port := os.Getenv("ALERTMANAGER_PORT")
+	if port == "" {
+		port = "1025"
+	}
+	
 	// Ask soundgoof why the port 1025 was chosen
-	log.Fatal(http.ListenAndServe(":1025", http.HandlerFunc(handle)))
+	log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(handle)))
 }
