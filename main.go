@@ -34,6 +34,11 @@ import (
 
 var (
 	m = sync.Mutex{}
+	username = ""
+	password = ""
+	sender = ""
+	port = ""
+	
 )
 
 type Alert struct {
@@ -122,7 +127,7 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 	log.Printf("Message: %s", message)
 
 	data := url.Values{
-		"from":    {"KamelNet"},
+		"from":    {sender},
 		"to":      {to},
 		"message": {message},
 	}
@@ -130,7 +135,7 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/sms", bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	req.SetBasicAuth(apiUsername, apiPassword)
+	req.SetBasicAuth(username, password)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -157,6 +162,27 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 
 func main() {
 	log.Printf("Running")
+	
+	// Read environment variables for username and password
+	username := os.Getenv("API_USERNAME")
+	if username == "" {
+		log.Fatal("Environment variable API_USERNAME is not set")
+	}
+	password := os.Getenv("API_PASSWORD")
+	if password == "" {
+		log.Fatal("Environment variable API_PASSWORD is not set")
+	}
+	sender := os.Getenv("API_SENDER")
+	if sender == "" {
+		log.Fatal("Environment variable API_SENDER is not set")
+	}
+	
+	// Read the environment variable for port, and use the default port 1025 if not set
+	port := os.Getenv("API_PORT")
+	if port == "" {
+		port = "1025"
+	}
+	
 	// Ask soundgoof why the port 1025 was chosen
-	log.Fatal(http.ListenAndServe(":1025", http.HandlerFunc(handle)))
+	log.Fatal(http.ListenAndServe(":"+port, http.HandlerFunc(handle)))
 }
