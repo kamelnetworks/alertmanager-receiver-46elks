@@ -5,6 +5,7 @@ Description=Alertmanager Receiver 46elks
 ExecStart=/usr/local/bin/alertmanager-receiver-46elks
 User=nobody
 WorkingDirectory=/tmp
+EnvironmentFile=/etc/sysconfig/alertmanager-receiver-46elks.env
 
 [Install]
 WantedBy=multi-user.target
