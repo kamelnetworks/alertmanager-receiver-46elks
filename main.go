@@ -34,8 +34,8 @@ import (
 
 var (
 	m = sync.Mutex{}
-	apiUSername = ""
-	apiPassword = ""
+	username = ""
+	password = ""
 	sender = ""
 	port = ""
 	
@@ -135,7 +135,7 @@ func handleAlert(w http.ResponseWriter, r *http.Request, alert *Alert) {
 	req, err := http.NewRequest("POST", "https://api.46elks.com/a1/sms", bytes.NewBufferString(data.Encode()))
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
 	req.Header.Add("Content-Length", strconv.Itoa(len(data.Encode())))
-	req.SetBasicAuth(apiUsername, apiPassword)
+	req.SetBasicAuth(username, password)
 
 	client := &http.Client{}
 	resp, err := client.Do(req)
@@ -164,21 +164,21 @@ func main() {
 	log.Printf("Running")
 	
 	// Read environment variables for username and password
-	apiUsername := os.Getenv("API_USERNAME")
-	if apiUsername == "" {
+	username := os.Getenv("API_USERNAME")
+	if username == "" {
 		log.Fatal("Environment variable API_USERNAME is not set")
 	}
-	apiPassword := os.Getenv("API_PASSWORD")
-	if apiPassword == "" {
+	password := os.Getenv("API_PASSWORD")
+	if password == "" {
 		log.Fatal("Environment variable API_PASSWORD is not set")
 	}
-	sender := os.Getenv("ALERTMANAGER_SENDER")
-	if semder == "" {
+	sender := os.Getenv("API_SENDER")
+	if sender == "" {
 		log.Fatal("Environment variable API_SENDER is not set")
 	}
 	
 	// Read the environment variable for port, and use the default port 1025 if not set
-	port := os.Getenv("ALERTMANAGER_PORT")
+	port := os.Getenv("API_PORT")
 	if port == "" {
 		port = "1025"
 	}
